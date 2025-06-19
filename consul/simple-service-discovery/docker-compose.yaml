@@ -1,0 +1,44 @@
+services:
+  consul1:
+    image: hashicorp/consul
+    container_name: consul1
+    command: agent -server -bootstrap-expect=3 -node=consul1 -client=0.0.0.0 -bind=172.20.0.11 -retry-join=172.20.0.12 -retry-join=172.20.0.13 -ui
+    networks:
+      consul_net:
+        ipv4_address: 172.20.0.11
+    ports:
+      - "8500:8500"
+    volumes:
+      - consul1_data:/consul/data
+
+  consul2:
+    image: hashicorp/consul
+    container_name: consul2
+    command: agent -server -node=consul2 -client=0.0.0.0 -bind=172.20.0.12 -retry-join=172.20.0.11 -retry-join=172.20.0.13 -ui
+    networks:
+      consul_net:
+        ipv4_address: 172.20.0.12
+    volumes:
+      - consul2_data:/consul/data
+
+  consul3:
+    image: hashicorp/consul
+    container_name: consul3
+    command: agent -server -node=consul3 -client=0.0.0.0 -bind=172.20.0.13 -retry-join=172.20.0.11 -retry-join=172.20.0.12 -ui
+    networks:
+      consul_net:
+        ipv4_address: 172.20.0.13
+    volumes:
+      - consul3_data:/consul/data
+
+volumes:
+  consul1_data:
+  consul2_data:
+  consul3_data:
+
+networks:
+  consul_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
